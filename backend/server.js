@@ -39,21 +39,28 @@ setupSocketIO(io);
 
 connectDB()
   .then(() => {
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    }).on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use.`);
-        console.log('Trying alternative port...');
-        const altPort = parseInt(PORT) + 1;
-        server.listen(altPort, () => {
-          console.log(`Server running on alternative port ${altPort}`);
-        });
-      } else {
-        console.error('Server error:', err);
-        process.exit(1);
-      }
-    });
+    const startServer = (port, isRetry = false) => {
+      server.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+      }).on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          if (!isRetry) {
+            console.error(`Port ${port} is already in use.`);
+            console.log('Trying alternative port...');
+            const altPort = parseInt(port) + 1;
+            startServer(altPort, true);
+          } else {
+            console.error(`Port ${port} is also in use. Please stop other servers or change the PORT in .env`);
+            process.exit(1);
+          }
+        } else {
+          console.error('Server error:', err);
+          process.exit(1);
+        }
+      });
+    };
+
+    startServer(PORT);
   })
   .catch((error) => {
     console.error('Failed to initialize database:', error);
