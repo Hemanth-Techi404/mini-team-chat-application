@@ -6,7 +6,7 @@ import ChannelView from './ChannelView';
 import OnlineUsers from './OnlineUsers';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { API_URL } from '../../config';
 
 function Chat() {
   const { user, logout } = useAuth();

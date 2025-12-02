@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { API_URL } from '../../config';
 
 function ChannelList({
   channels,
@@ -112,8 +112,8 @@ function ChannelList({
             key={channel.id}
             onClick={() => onSelectChannel(channel)}
             className={`p-2 rounded-lg cursor-pointer transition-all ${selectedChannel?.id === channel.id
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-purple-500/30'
-                : 'hover:bg-slate-700/50 text-slate-300 hover:text-white'
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-purple-500/30'
+              : 'hover:bg-slate-700/50 text-slate-300 hover:text-white'
               }`}
           >
             <div className="font-medium"># {channel.name}</div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { API_URL } from '../../config';
 
 function ChannelView({ channel, socket, currentUser }) {
   const [messages, setMessages] = useState([]);
@@ -226,8 +226,8 @@ function ChannelView({ channel, socket, currentUser }) {
           >
             <div
               className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow-lg ${message.user_id === currentUser?.id
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
-                  : 'bg-slate-800 text-slate-100 border border-slate-700'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                : 'bg-slate-800 text-slate-100 border border-slate-700'
                 }`}
             >
               {message.user_id !== currentUser?.id && (
@@ -238,8 +238,8 @@ function ChannelView({ channel, socket, currentUser }) {
               <div className="text-sm">{message.content}</div>
               <div
                 className={`text-xs mt-1 ${message.user_id === currentUser?.id
-                    ? 'text-indigo-200'
-                    : 'text-slate-500'
+                  ? 'text-indigo-200'
+                  : 'text-slate-500'
                   }`}
               >
                 {formatTime(message.created_at)}

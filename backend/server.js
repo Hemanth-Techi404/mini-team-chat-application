@@ -35,6 +35,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Root route for basic server verification
+app.get('/', (req, res) => {
+  res.send('Chat App Backend is running!');
+});
+
 // MongoDB connection health check endpoint
 app.get('/api/db-health', (req, res) => {
   const mongoose = require('mongoose');
