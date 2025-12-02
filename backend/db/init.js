@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const mongoUrl = process.env.MONGO_URL || 'mongodb+srv://hemanth:hemanth@cluster0.5bdotf1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/chat_app';
 
 const connectDB = async () => {
   try {

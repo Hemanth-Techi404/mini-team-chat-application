@@ -35,6 +35,32 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// MongoDB connection health check endpoint
+app.get('/api/db-health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbState = mongoose.connection.readyState;
+
+  const states = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  };
+
+  const isConnected = dbState === 1;
+
+  res.json({
+    status: isConnected ? 'ok' : 'error',
+    database: {
+      connected: isConnected,
+      state: states[dbState],
+      host: mongoose.connection.host || 'N/A',
+      name: mongoose.connection.name || 'N/A',
+      mongoUrl: process.env.MONGO_URL ? '***configured***' : 'not configured'
+    }
+  });
+});
+
 setupSocketIO(io);
 
 connectDB()
