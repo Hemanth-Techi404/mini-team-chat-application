@@ -41,6 +41,18 @@ connectDB()
   .then(() => {
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+    }).on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use.`);
+        console.log('Trying alternative port...');
+        const altPort = parseInt(PORT) + 1;
+        server.listen(altPort, () => {
+          console.log(`Server running on alternative port ${altPort}`);
+        });
+      } else {
+        console.error('Server error:', err);
+        process.exit(1);
+      }
     });
   })
   .catch((error) => {
