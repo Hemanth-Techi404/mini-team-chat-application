@@ -3,7 +3,6 @@ const { Message, ChannelMember } = require('../db/init');
 
 // Store online users: userId -> { username, socketIds: Set }
 const onlineUsers = new Map();
-
 const setupSocketIO = (io) => {
   // Authentication middleware for Socket.IO
   io.use(async (socket, next) => {
