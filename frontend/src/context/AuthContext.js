@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { API_URL, apiClient } from '../config';
 
 const AuthContext = createContext();
-
-import { API_URL } from '../config';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -29,14 +27,11 @@ export const AuthProvider = ({ children }) => {
 
   const verifyToken = async (token) => {
     try {
-      const response = await axios.get(`${API_URL}/auth/verify`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.get('/auth/verify');
       setUser(response.data.user);
       setLoading(false);
     } catch (error) {
+      console.error('Token verification failed:', error.message);
       localStorage.removeItem('token');
       setUser(null);
       setLoading(false);
@@ -45,7 +40,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await apiClient.post('/auth/login', {
         username,
         password
       });
@@ -55,14 +50,14 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Login failed'
+        error: error.response?.data?.error || error.message || 'Login failed. Please check if the server is running.'
       };
     }
   };
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, {
+      const response = await apiClient.post('/auth/register', {
         username,
         email,
         password
@@ -73,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error || 'Registration failed'
+        error: error.response?.data?.error || error.message || 'Registration failed. Please check if the server is running.'
       };
     }
   };

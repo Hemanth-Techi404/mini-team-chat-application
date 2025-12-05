@@ -12,19 +12,48 @@ const { setupSocketIO } = require('./socket/socketHandler');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
-  credentials: true
-}));
+// CORS configuration - allow multiple origins in development
+// Support multiple CLIENT_URLs separated by comma for deployment
+const allowedOrigins = process.env.CLIENT_URL 
+  ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+  : ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // In development, allow all localhost origins
+    if (process.env.NODE_ENV !== 'production') {
+      if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+        return callback(null, true);
+      }
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+// Initialize Socket.io with CORS configuration
+const io = socketIo(server, {
+  cors: {
+    origin: corsOptions.origin,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -71,8 +100,16 @@ setupSocketIO(io);
 connectDB()
   .then(() => {
     const startServer = (port, isRetry = false) => {
-      server.listen(port, () => {
-        console.log(`Server running on port ${port}`);
+      // Listen on 0.0.0.0 to accept connections from any interface
+      server.listen(port, '0.0.0.0', () => {
+        console.log(`✅ Server running on port ${port}`);
+        console.log(`🌐 Server accessible at http://localhost:${port}`);
+        console.log(`📡 API available at http://localhost:${port}/api`);
+        if (process.env.CLIENT_URL) {
+          console.log(`🔒 CORS enabled for: ${process.env.CLIENT_URL}`);
+        } else {
+          console.log(`🔓 CORS enabled for localhost (development mode)`);
+        }
       }).on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
           if (!isRetry) {

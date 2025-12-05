@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-
-import { API_URL } from '../../config';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { apiClient } from '../../config';
 
 function ChannelView({ channel, socket, currentUser }) {
   const [messages, setMessages] = useState([]);
@@ -14,6 +12,42 @@ function ChannelView({ channel, socket, currentUser }) {
   const [showMembers, setShowMembers] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+
+  const loadMessages = useCallback(async (pageNum = 1) => {
+    if (!channel) return;
+    
+    try {
+      const response = await apiClient.get(
+        `/messages/channel/${channel.id}?page=${pageNum}&limit=50`
+      );
+
+      if (pageNum === 1) {
+        setMessages(response.data.messages);
+      } else {
+        setMessages((prev) => [...response.data.messages, ...prev]);
+      }
+
+      setHasMore(response.data.pagination.hasMore);
+      setPage(pageNum);
+      setLoading(false);
+      setLoadingMore(false);
+    } catch (error) {
+      console.error('Failed to load messages:', error.message);
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [channel]);
+
+  const fetchChannelDetails = useCallback(async () => {
+    if (!channel) return;
+    
+    try {
+      const response = await apiClient.get(`/channels/${channel.id}`);
+      setChannelDetails(response.data);
+    } catch (error) {
+      console.error('Failed to fetch channel details:', error.message);
+    }
+  }, [channel]);
 
   useEffect(() => {
     if (channel && socket) {
@@ -32,49 +66,12 @@ function ChannelView({ channel, socket, currentUser }) {
         socket.off('new-message');
       };
     }
-  }, [channel?.id, socket]);
+  }, [channel?.id, socket, loadMessages, fetchChannelDetails]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const loadMessages = async (pageNum = 1) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${API_URL}/messages/channel/${channel.id}?page=${pageNum}&limit=50`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (pageNum === 1) {
-        setMessages(response.data.messages);
-      } else {
-        setMessages((prev) => [...response.data.messages, ...prev]);
-      }
-
-      setHasMore(response.data.pagination.hasMore);
-      setPage(pageNum);
-      setLoading(false);
-      setLoadingMore(false);
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
-
-  const fetchChannelDetails = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${API_URL}/channels/${channel.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setChannelDetails(response.data);
-    } catch (error) {
-      console.error('Failed to fetch channel details:', error);
-    }
-  };
 
   const handleLeaveChannel = async () => {
     if (!window.confirm('Are you sure you want to leave this channel?')) {
@@ -82,16 +79,11 @@ function ChannelView({ channel, socket, currentUser }) {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${API_URL}/channels/${channel.id}/leave`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiClient.post(`/channels/${channel.id}/leave`);
       window.location.reload();
     } catch (error) {
-      console.error('Failed to leave channel:', error);
-      alert(error.response?.data?.error || 'Failed to leave channel');
+      console.error('Failed to leave channel:', error.message);
+      alert(error.response?.data?.error || error.message || 'Failed to leave channel. Please check if the server is running.');
     }
   };
 

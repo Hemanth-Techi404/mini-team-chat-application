@@ -16,12 +16,38 @@ function Register() {
     setError('');
     setLoading(true);
 
-    const result = await register(username, email, password);
+    // Trim inputs to avoid whitespace issues
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedEmail || !trimmedPassword) {
+      setError('Please fill in all fields');
+      setLoading(false);
+      return;
+    }
+
+    if (trimmedUsername.length < 3) {
+      setError('Username must be at least 3 characters');
+      setLoading(false);
+      return;
+    }
+
+    if (trimmedPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
+    console.log('[REGISTER] Attempting registration...');
+    const result = await register(trimmedUsername, trimmedEmail, trimmedPassword);
     setLoading(false);
 
     if (result.success) {
+      console.log('[REGISTER] Registration successful, navigating...');
       navigate('/');
     } else {
+      console.error('[REGISTER] Registration failed:', result.error);
       setError(result.error);
     }
   };

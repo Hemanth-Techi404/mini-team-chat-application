@@ -15,12 +15,25 @@ function Login() {
     setError('');
     setLoading(true);
 
-    const result = await login(username, password);
+    // Trim inputs to avoid whitespace issues
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
+      setError('Please enter both username and password');
+      setLoading(false);
+      return;
+    }
+
+    console.log('[LOGIN] Attempting login...');
+    const result = await login(trimmedUsername, trimmedPassword);
     setLoading(false);
 
     if (result.success) {
+      console.log('[LOGIN] Login successful, navigating...');
       navigate('/');
     } else {
+      console.error('[LOGIN] Login failed:', result.error);
       setError(result.error);
     }
   };
