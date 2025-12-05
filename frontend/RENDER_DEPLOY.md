@@ -26,8 +26,12 @@ If the service doesn't auto-create from `render.yaml`:
 3. Connect your GitHub repository
 4. Configure:
    - **Name**: `mini-team-chat-frontend`
-   - **Build Command**: `cd frontend && npm install && npm run build`
+   - **Build Command**: `npm install --prefix frontend && npm run build --prefix frontend`
    - **Publish Directory**: `frontend/build`
+   
+   **Alternative Build Command (if above doesn't work):**
+   - **Build Command**: `cd frontend && npm install && npm run build`
+   - **Publish Directory**: `build` (not `frontend/build`)
 
 #### B. Set Environment Variables
 1. Go to **Environment** tab
