@@ -15,7 +15,7 @@ function ChannelView({ channel, socket, currentUser }) {
 
   const loadMessages = useCallback(async (pageNum = 1) => {
     if (!channel) return;
-    
+
     try {
       const response = await apiClient.get(
         `/messages/channel/${channel.id}?page=${pageNum}&limit=50`
@@ -40,7 +40,7 @@ function ChannelView({ channel, socket, currentUser }) {
 
   const fetchChannelDetails = useCallback(async () => {
     if (!channel) return;
-    
+
     try {
       const response = await apiClient.get(`/channels/${channel.id}`);
       setChannelDetails(response.data);
@@ -66,7 +66,7 @@ function ChannelView({ channel, socket, currentUser }) {
         socket.off('new-message');
       };
     }
-  }, [channel?.id, socket, loadMessages, fetchChannelDetails]);
+  }, [channel, socket, loadMessages, fetchChannelDetails]);
 
   useEffect(() => {
     scrollToBottom();
