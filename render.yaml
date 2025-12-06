@@ -16,7 +16,7 @@ services:
   - type: static
     name: mini-team-chat-frontend
     buildCommand: npm install --prefix frontend && npm run build --prefix frontend
-    staticPublishPath: ./frontend/build
+    staticPublishPath: frontend/build
     envVars:
       - key: REACT_APP_API_URL
         value: https://mini-team-chat-application-8.onrender.com/api
